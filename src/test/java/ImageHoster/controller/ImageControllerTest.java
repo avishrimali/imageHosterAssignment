@@ -190,7 +190,8 @@ public class ImageControllerTest {
     }
 
 
-    //This test checks the controller logic when non owner of the image sends the GET request to get the form to edit the image and checks whether the Model type object contains the desired attribute with desired value
+    //This test checks the controller logic when non owner of the image sends the GET request to get
+    // the form to edit the image and checks whether the Model type object contains the desired attribute with desired value
     @Test
     public void editImageWithNonOwnerOfTheImage() throws Exception {
         User user = new User();

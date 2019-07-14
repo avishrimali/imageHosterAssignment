@@ -1,4 +1,3 @@
-/*
 package ImageHoster.controller;
 
 import ImageHoster.model.User;
@@ -67,7 +66,8 @@ public class UserControllerTest {
                 .andExpect(model().attribute("passwordTypeError", equalTo("Password must contain atleast 1 alphabet, 1 number & 1 special character")));
     }
 
-    //This test checks the controller logic for user signup when user fills the form and send the POST request to the server with the correct password type and checks whether the logic returns the html file 'users/login.html'
+    //This test checks the controller logic for user signup when user fills the form and send the POST
+    // request to the server with the correct password type and checks whether the logic returns the html file 'users/login.html'
     @Test
     public void signupWithCorrectPasswordType() throws Exception {
         User user = new User();
@@ -167,4 +167,3 @@ public class UserControllerTest {
                 .andExpect(content().string(containsString("Image Hoster")));
     }
 }
-*/
