@@ -1,6 +1,5 @@
 package ImageHoster.repository;
 
-import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import org.springframework.stereotype.Repository;
 
@@ -111,7 +110,4 @@ public class ImageRepository {
         }
     }
 
-    public void setAllComments(List<Comment> commentList) {
-
-    }
 }

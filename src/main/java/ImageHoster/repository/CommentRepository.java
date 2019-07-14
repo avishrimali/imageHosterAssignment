@@ -7,14 +7,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceUnit;
-import java.util.List;
 
+/**
+ * Repository Class for Comment Feature
+ */
 @Repository
 public class CommentRepository {
 
     @PersistenceUnit(unitName = "imageHoster")
     private EntityManagerFactory emf;
 
+    /**
+     * @param comment
+     * @return Comment
+     */
     public Comment addComments(Comment comment) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();

@@ -5,7 +5,6 @@ import ImageHoster.model.Image;
 import ImageHoster.model.User;
 import ImageHoster.service.CommentService;
 import ImageHoster.service.ImageService;
-import ImageHoster.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Controller Class which provides APIs to implement Comments.
+ */
 @Controller
 public class CommentController {
 
@@ -28,27 +28,25 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @RequestMapping(value = "image/{imageId}/{imageTitle}/comments")
-    public String createComment(@PathVariable("imageId") Integer imageId, @PathVariable("imageTitle") String imageTitle, HttpSession session,Model model) {
-        Image image = imageService.getImage(imageId);
-        model.addAttribute("comments", image.getComments());
-        return "images/image";
-    }
-
-    @RequestMapping(value="image/{imageId}/{imageTitle}/comments", method = RequestMethod.POST)
-    public String createCommentSubmit(@PathVariable("imageId") Integer imageId, @PathVariable("imageTitle") String imageTitle,
-                                @RequestParam("comments") String commentText, HttpSession session, Model model){
+    /**
+     * @param imageId
+     * @param comment
+     * @param commentToSubmit
+     * @param session
+     * @return String
+     */
+    @RequestMapping(value="/image/{imageId}/{imageTitle}/comments", method = RequestMethod.POST)
+    public String createComment(@PathVariable("imageId") Integer imageId,
+                                @RequestParam("comment") String comment, Comment commentToSubmit, HttpSession session){
         User user = (User) session.getAttribute("loggeduser");
         Image image = imageService.getImage(imageId);
 
-        Comment comment= new Comment();
-        comment.setText(commentText);
-        comment.setCreatedDate(LocalDate.now());
-        comment.setImage(image);
-        comment.setUser(image.getUser());
-        commentService.addComments(comment);
-//        image.setComments(comment);
-//        imageService.updateImage(image);
-        return "images/image";
+        commentToSubmit.setText(comment);
+        commentToSubmit.setCreatedDate(LocalDate.now());
+        commentToSubmit.setImage(image);
+        commentToSubmit.setUser(user);
+        commentService.addComments(commentToSubmit);
+
+        return "redirect:/images/"+ imageId+"/"+ image.getTitle();
     }
 }

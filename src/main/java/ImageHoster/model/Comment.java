@@ -3,6 +3,9 @@ package ImageHoster.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * Model class to implement Comments and create comment table
+ */
 @Entity
 @Table(name = "comment")
 public class Comment {
@@ -22,7 +25,7 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id")
     private Image image;
 

@@ -1,10 +1,8 @@
 package ImageHoster.controller;
 
-import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
-import ImageHoster.service.CommentService;
 import ImageHoster.service.ImageService;
 import ImageHoster.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 
 @Controller
@@ -49,20 +46,22 @@ public class ImageController {
     //Here a list of tags is added in the Model type object
     //this list is then sent to 'images/image.html' file and the tags are displayed
 
-   /* Fixing the issue1 described at : https://github.com/upgrad-edu/Course_4_Assignment/issues/1.
-    Updated the method to take imageId along with title as path variable.
-    Also modified the required changes in images.html file.*/
+    /* Fix of second issue in Part A Fixing Issues:
+    Fixing the issue1 described at : https://github.com/upgrad-edu/Course_4_Assignment/issues/1.
+   Updated the method to take imageId along with title as path variable.
+   Also modified the required changes in images.html file.*/
+
+//    As part of Comment feature implementation added comments attribute under try and catch block here to show the comments.
 
     @RequestMapping("/images/{imageId}/{title}")
     public String showImage(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, Model model) {
         Image image = imageService.getImage(imageId);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
-        try{
-            Comment comment = image.getComments();
-            model.addAttribute("comments", comment);
-        }catch (NullPointerException npe){
-
+        try {
+            model.addAttribute("comments", image.getComments());
+        }catch (NullPointerException nullPointerException){
+            System.out.println("There are no comments");
         }
         return "images/image";
     }
@@ -99,32 +98,11 @@ public class ImageController {
         return "redirect:/images";
     }
 
-//    @RequestMapping(value="/image/{imageId}/{imageTitle}/comments", method = RequestMethod.POST)
-//    public String createComment(@PathVariable("imageId") Integer imageId, @PathVariable("imageTitle") String imageTitle,
-//                                @RequestParam("comments") String commentText, HttpSession session, Model model){
-//        User user = (User) session.getAttribute("loggeduser");
-//        Image image = imageService.getImage(imageId);
-//
-//        Comment comment= new Comment();
-//        comment.setText(commentText);
-//        comment.setCreatedDate(LocalDate.now());
-//        comment.setImage(image);
-//        comment.setUser(image.getUser());
-//
-//        List<Comment> commentList= new ArrayList<>();
-//        commentList.add(comment);
-//        commentService.addComments(commentList);
-//        image.setComments(commentList);
-//        imageService.updateImage(image);
-//        return "images/image";
-//    }
-
     //This controller method is called when the request pattern is of type 'editImage'
     //This method fetches the image with the corresponding id from the database and adds it to the model with the key as 'image'
     //The method then returns 'images/edit.html' file wherein you fill all the updated details of the image
 
-    //The method first needs to convert the list of all the tags to a string containing all the tags separated by
-    // a comma and then add this string in a Model type object
+    //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
     @RequestMapping(value = "/editImage")
     public String editImage(@RequestParam("imageId") Integer imageId, Model model) {
@@ -137,8 +115,7 @@ public class ImageController {
 
     //This controller method is called when the request pattern is of type 'images/edit' and also the incoming request is of PUT type
     //The method receives the imageFile, imageId, updated image, along with the Http Session
-    //The method adds the new imageFile to the updated image if user updates the imageFile and adds the previous imageFile to
-    // the new updated image if user does not choose to update the imageFile
+    //The method adds the new imageFile to the updated image if user updates the imageFile and adds the previous imageFile to the new updated image if user does not choose to update the imageFile
     //Set an id of the new updated image
     //Set the user using Http Session
     //Set the date on which the image is posted
@@ -146,19 +123,23 @@ public class ImageController {
     //Direct to the same page showing the details of that particular updated image
 
     //The method also receives tags parameter which is a string of all the tags separated by a comma using the annotation @RequestParam
-    //The method converts the string to a list of all the tags using findOrCreateTags() method and sets the tags
-    // attribute of an image as a list of all the tags
+    //The method converts the string to a list of all the tags using findOrCreateTags() method and sets the tags attribute of an image as a list of all the tags
+
+    /*Fix of second issue for edit in Part A "Fixing Issues":
+    Issue Descpription: https://github.com/upgrad-edu/Course_4_Assignment/issues/3
+    updating model with aprropriate message if found the owner and current user is not same.
+    And not allowing user to update the image.*/
+
     @RequestMapping(value = "/editImage", method = RequestMethod.PUT)
     public String editImageSubmit(@RequestParam("file") MultipartFile file, @RequestParam("imageId") Integer imageId,
                                   @RequestParam("tags") String tags, Image updatedImage, HttpSession session, Model model) throws IOException {
 
-        String error = "Only the owner of the image can edit the image";
         Image image = imageService.getImage(imageId);
         User user = (User) session.getAttribute("loggeduser");
 
-        if (image.getUser().getId()!=user.getId()) {
+        if (image.getUser().getId() != user.getId()) {
+            String error = "Only the owner of the image can edit the image";
             model.addAttribute("editError", error);
-            System.out.println(error);
             return "images/image";
         } else {
             String updatedImageData = convertUploadedFileToBase64(file);
@@ -171,6 +152,7 @@ public class ImageController {
             }
 
             updatedImage.setId(imageId);
+
             updatedImage.setUser(user);
             updatedImage.setTags(imageTags);
             updatedImage.setDate(new Date());
@@ -184,15 +166,21 @@ public class ImageController {
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
-    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model) {
 
-        String error = "Only the owner of the image can delete the image";
+    /*Fix of second issue for delete in Part A "Fixing Issues":
+    Issue Descpription: https://github.com/upgrad-edu/Course_4_Assignment/issues/3
+    updating model with aprropriate message if found the owner and current user is not same.
+    And not allowing user to delete the image.*/
+
+    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, Model model, HttpSession session) {
         Image image = imageService.getImage(imageId);
         User user = (User) session.getAttribute("loggeduser");
-        if (image.getUser().getId()!=user.getId()) {
+        if (image.getUser().getId() != user.getId()) {
+            String error = "Only the owner of the image can delete the image";
+            model.addAttribute("image", image);
             model.addAttribute("deleteError", error);
-            return "redirect:/images";
+            return "images/image";
         } else {
             imageService.deleteImage(imageId);
             return "redirect:/images";

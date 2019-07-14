@@ -40,20 +40,26 @@ public class UserController {
 
     //This controller method is called when the request pattern is of type 'users/registration' and also the incoming request is of POST type
     //This method calls the business logic and after the user record is persisted in the database, directs to login page
+
+    /*Fix of Password Strength problem of Part B: Implement a new Feature:
+    Implemented a private method named verifyPasswordStrength which verifys the password strenght.
+    And if found password is not strong then not allowing user to register and updating required attributes.*/
+
     @RequestMapping(value = "users/registration", method = RequestMethod.POST)
     public String registerUser(User user, Model model) {
-
-        if(!verifyPasswordStrength(user.getPassword())){
-            String error = "Password must contain atleast 1 alphabet, 1 number & 1 special character";
+        if (!verifyPasswordStrength(user.getPassword())) {
+            String error = "Password must contain at least 1 alphabet, 1 number & 1 special character";
             model.addAttribute("passwordTypeError", error);
-            return "redirect:/users/registration";
+            model.addAttribute("User", user);
+            return "users/registration";
+        } else {
+            userService.registerUser(user);
+            return "redirect:/users/login";
         }
-        userService.registerUser(user);
-        return "redirect:/users/login";
     }
 
     private boolean verifyPasswordStrength(String password) {
-        String patternToCheck= "((?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%]).*)";
+        String patternToCheck = "((?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%]).*)";
         Pattern pattern = Pattern.compile(patternToCheck);
         return pattern.matcher(password).matches();
     }
